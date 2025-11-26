@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra
 
 # Default rule: build any target matching a .c file
 %: %.c
-	$(CC) $(CFLAGS) $< -o bin/$@
+	$(CC) $(CFLAGS) $< utils.c -o bin/$@
 
 clean:
 	rm -f *.o
