@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     if (p == NULL) {
 	/*Write formatted output to stream stderr */
-	fprintf(stderr, "client: failed to connect\n");
+  	fprintf(stderr, "client: failed to connect\n");
 	return 2;
     }
 
