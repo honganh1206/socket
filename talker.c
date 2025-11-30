@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (p == NULL) {
-        fprintf(stderr, "talker: failed to create socket\n");
+        fprintf(stderr, "talker: failed to create socket\n"); 
         return 2;
     }
 
