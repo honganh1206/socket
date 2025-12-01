@@ -11,36 +11,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <poll.h>
+#include "utils.h"
 
-#define PORT "9034"
 
 /*A multiperson chat server */
-
-/*Convert socket to IP address string without the hairy detail of switching between IPv4 and IPv6.
- * It returns const char * because inet_ntop does it.*/
-const char *inet_ntop2(void *addr, char *buf, size_t size) {
-    struct sockaddr_storage *sas = addr;
-    struct sockaddr_in *sa4;
-    struct sockaddr_in6 *sa6;
-    void *src;
-
-    switch (sas->ss_family) {
-	case AF_INET:
-	    /* Assign generic pointer type to concrete type? How? */
-	    sa4 = addr;
-	    src = &(sa4->sin_addr);
-	    break;
-	case AF_INET6:
-	    sa6 = addr;
-	    src = &(sa6->sin6_addr);
-	    break;
-	default:
-	    return NULL;
-    }
-
-    return inet_ntop(sas->ss_family, src, buf, size);
-}
-
 int get_listener_socket(void) {
     int listener; // File descriptor of the listener
     int yes = 1;
@@ -53,7 +27,7 @@ int get_listener_socket(void) {
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &ai)) != 0) {
+    if ((rv = getaddrinfo(NULL,CHATSERVERPORT, &hints, &ai)) != 0) {
 	fprintf(stderr, "pollserver: %s\n", gai_strerror(rv));
 	exit(1);
     }
@@ -128,7 +102,8 @@ void handle_new_connection(int listener, int *fd_count, int *fd_size, struct pol
     char remoteIP[INET6_ADDRSTRLEN];
 
     addrlen = sizeof remoteaddr;
-    /*Open a new socket when a connection arrives */
+    /*Open a new socket when a connection arrives
+     * This might block when no incoming connections are waiting*/
     newfd = accept(listener, (struct sockaddr *)&remoteaddr, &addrlen);
 
     if (newfd == -1) {
@@ -146,7 +121,7 @@ void handle_new_connection(int listener, int *fd_count, int *fd_size, struct pol
 void handle_client_data(int listener, int *fd_count, struct pollfd *pfds, int *pfd_i) {
     char buf[256];
 
-    /*Read bytes from fille descriptor into buf */
+    /*Read bytes from file descriptor into buf */
     int nbytes = recv(pfds[*pfd_i].fd, buf, sizeof buf, 0);
 
     int sender_fd = pfds[*pfd_i].fd;
