@@ -76,12 +76,12 @@ void handle_new_connection(int listener, fd_set *master, int *fdmax) {
     if (new_fd == -1) {
 	perror("accept");
     } else {
+	/*Add socket of the new connection to the set */
 	FD_SET(new_fd, master);
 	if (new_fd > *fdmax) {
 	    *fdmax = new_fd;
 	}
-	printf("selectserver: new connection from %s on "
-            "socket %d\n",
+	printf("selectserver: new connection from %s on socket %d\n",
             inet_ntop2(&remoteaddr, remoteIP, sizeof remoteIP),
             new_fd);
     }
@@ -115,6 +115,7 @@ void handle_client_data(int s, int listener, fd_set *master, int fdmax) {
 	    perror("recv");
 	}
 	close(s);
+	/*Remove the socket from the set */
 	FD_CLR(s, master);
     } else {
 	/*Recursive broadcasting */
@@ -124,7 +125,8 @@ void handle_client_data(int s, int listener, fd_set *master, int fdmax) {
 
 int main(void) {
     fd_set master;
-    /*Temp fd list for select */
+    /*Temp fd list for select()
+     * since select() will modify the set we pass into it (master)*/
     fd_set read_fds;
     int fdmax;
 
